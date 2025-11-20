@@ -1,4 +1,4 @@
-"""PyTorch ResNet
+"""PyTorch ResNet3D
 
 This started as a copy of https://github.com/pytorch/vision 'resnet.py' (BSD-3-Clause) with
 additional dropout and dynamic global avg/max pool.
@@ -34,9 +34,9 @@ from ._registry import (
 )
 
 __all__ = [
-    "ResNet",
-    "BasicBlock",
-    "Bottleneck",
+    "ResNet3D",
+    "BasicBlock3D",
+    "Bottleneck3D",
 ]  # model_registry will add each entrypoint fn to this
 
 
@@ -45,10 +45,10 @@ def get_padding(kernel_size: int, stride: int, dilation: int = 1) -> int:
     return padding
 
 
-class BasicBlock(nn.Module):
-    """Basic residual block for ResNet.
+class BasicBlock3D(nn.Module):
+    """Basic residual block for ResNet3D.
 
-    This is the standard residual block used in ResNet-18 and ResNet-34.
+    This is the standard residual block used in ResNet3D-18 and ResNet3D-34.
     """
 
     expansion = 1
@@ -86,8 +86,8 @@ class BasicBlock(nn.Module):
         dd = {"device": device, "dtype": dtype}
         super().__init__()
 
-        assert cardinality == 1, "BasicBlock only supports cardinality of 1"
-        assert base_width == 64, "BasicBlock does not support changing base width"
+        assert cardinality == 1, "BasicBlock3D only supports cardinality of 1"
+        assert base_width == 64, "BasicBlock3D does not support changing base width"
         first_planes = planes // reduce_first
         outplanes = planes * self.expansion
         first_dilation = first_dilation or dilation
@@ -144,10 +144,10 @@ class BasicBlock(nn.Module):
         return x
 
 
-class Bottleneck(nn.Module):
-    """Bottleneck residual block for ResNet.
+class Bottleneck3D(nn.Module):
+    """Bottleneck3D residual block for ResNet3D.
 
-    This is the bottleneck block used in ResNet-50, ResNet-101, and ResNet-152.
+    This is the bottleneck block used in ResNet3D-50, ResNet3D-101, and ResNet3D-152.
     """
 
     expansion = 4
@@ -309,7 +309,7 @@ def downsample_avg(
 
 
 def make_blocks(
-    block_fns: Tuple[Union[Type[BasicBlock], Type[Bottleneck]], ...],
+    block_fns: Tuple[Union[Type[BasicBlock3D], Type[Bottleneck3D]], ...],
     channels: Tuple[int, ...],
     block_repeats: Tuple[int, ...],
     inplanes: int,
@@ -321,7 +321,7 @@ def make_blocks(
     dtype=None,
     **kwargs,
 ) -> Tuple[List[Tuple[str, nn.Module]], List[Dict[str, Any]]]:
-    """Create ResNet stages with specified block configurations.
+    """Create ResNet3D stages with specified block configurations.
 
     Args:
         block_fns: Block class to use for each stage.
@@ -401,14 +401,14 @@ def make_blocks(
     return stages, feature_info
 
 
-class ResNet(nn.Module):
-    """ResNet / ResNeXt / SE-ResNeXt / SE-Net
+class ResNet3D(nn.Module):
+    """ResNet3D / ResNeXt / SE-ResNeXt / SE-Net
 
-    This class implements all variants of ResNet, ResNeXt, SE-ResNeXt, and SENet that
+    This class implements all variants of ResNet3D, ResNeXt, SE-ResNeXt, and SENet that
       * have > 1 stride in the 3x3 conv layer of bottleneck
       * have conv-bn-act ordering
 
-    This ResNet impl supports a number of stem and downsample options based on the v1c, v1d, v1e, and v1s
+    This ResNet3D impl supports a number of stem and downsample options based on the v1c, v1d, v1e, and v1s
     variants included in the MXNet Gluon ResNetV1b model. The C and D variants are also discussed in the
     'Bag of Tricks' paper: https://arxiv.org/pdf/1812.01187. The B variant is equivalent to torchvision default.
 
@@ -435,7 +435,7 @@ class ResNet(nn.Module):
 
     def __init__(
         self,
-        block: Union[BasicBlock, Bottleneck],
+        block: Union[BasicBlock3D, Bottleneck3D],
         layers: Tuple[int, ...],
         num_classes: int = 1000,
         in_chans: int = 3,
@@ -460,13 +460,13 @@ class ResNet(nn.Module):
     ):
         """
         Args:
-            block (nn.Module): class for the residual block. Options are BasicBlock, Bottleneck.
+            block (nn.Module): class for the residual block. Options are BasicBlock3D, Bottleneck3D.
             layers (List[int]) : number of layers in each block
             num_classes (int): number of classification classes (default 1000)
             in_chans (int): number of input (color) channels. (default 3)
             output_stride (int): output stride of the network, 32, 16, or 8. (default 32)
             global_pool (str): Global pooling type. One of 'avg', 'max', 'avgmax', 'catavgmax' (default 'avg')
-            cardinality (int): number of convolution groups for 3x3 conv in Bottleneck. (default 1)
+            cardinality (int): number of convolution groups for 3x3 conv in Bottleneck3D. (default 1)
             base_width (int): bottleneck channels factor. `planes * base_width / 64 * cardinality` (default 64)
             stem_width (int): number of channels in stem convolutions (default 64)
             stem_type (str): The type of stem (default ''):
@@ -769,8 +769,8 @@ class ResNet(nn.Module):
         return x
 
 
-def _create_resnet(variant: str, pretrained: bool = False, **kwargs) -> ResNet:
-    """Create a ResNet model.
+def _create_resnet(variant: str, pretrained: bool = False, **kwargs) -> ResNet3D:
+    """Create a ResNet3D model.
 
     Args:
         variant: Model variant name.
@@ -778,13 +778,13 @@ def _create_resnet(variant: str, pretrained: bool = False, **kwargs) -> ResNet:
         **kwargs: Additional model arguments.
 
     Returns:
-        ResNet model instance.
+        ResNet3D model instance.
     """
-    return build_model_with_cfg(ResNet, variant, pretrained, **kwargs)
+    return build_model_with_cfg(ResNet3D, variant, pretrained, **kwargs)
 
 
 def _cfg(url: str = "", **kwargs) -> Dict[str, Any]:
-    """Create a default configuration for ResNet models."""
+    """Create a default configuration for ResNet3D models."""
     return {
         "url": url,
         "num_classes": 1000,
@@ -805,17 +805,17 @@ default_cfgs = generate_default_cfgs({})
 
 
 @register_model
-def resnet18_3d(pretrained: bool = False, **kwargs) -> ResNet:
-    """Constructs a ResNet-18 model."""
-    model_args = dict(block=BasicBlock, layers=(2, 2, 2, 2))
+def resnet18_3d(pretrained: bool = False, **kwargs) -> ResNet3D:
+    """Constructs a ResNet3D-18 model."""
+    model_args = dict(block=BasicBlock3D, layers=(2, 2, 2, 2))
     return _create_resnet("resnet18_3d", pretrained, **dict(model_args, **kwargs))
 
 
 @register_model
-def test_resnet(pretrained: bool = False, **kwargs) -> ResNet:
-    """Constructs a tiny ResNet test model."""
+def test_resnet(pretrained: bool = False, **kwargs) -> ResNet3D:
+    """Constructs a tiny ResNet3D test model."""
     model_args = dict(
-        block=[BasicBlock, BasicBlock, Bottleneck, BasicBlock],
+        block=[BasicBlock3D, BasicBlock3D, Bottleneck3D, BasicBlock3D],
         layers=(1, 1, 1, 1),
         stem_width=16,
         stem_type="deep",

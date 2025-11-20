@@ -805,14 +805,14 @@ default_cfgs = generate_default_cfgs({})
 
 
 @register_model
-def resnet18_3d(pretrained: bool = False, **kwargs) -> ResNet3D:
+def resnet3d_18(pretrained: bool = False, **kwargs) -> ResNet3D:
     """Constructs a ResNet3D-18 model."""
     model_args = dict(block=BasicBlock3D, layers=(2, 2, 2, 2))
-    return _create_resnet("resnet18_3d", pretrained, **dict(model_args, **kwargs))
+    return _create_resnet("resnet3d_18", pretrained, **dict(model_args, **kwargs))
 
 
 @register_model
-def test_resnet(pretrained: bool = False, **kwargs) -> ResNet3D:
+def test_resnet3d(pretrained: bool = False, **kwargs) -> ResNet3D:
     """Constructs a tiny ResNet3D test model."""
     model_args = dict(
         block=[BasicBlock3D, BasicBlock3D, Bottleneck3D, BasicBlock3D],
@@ -822,7 +822,7 @@ def test_resnet(pretrained: bool = False, **kwargs) -> ResNet3D:
         avg_down=True,
         channels=(32, 48, 48, 96),
     )
-    return _create_resnet("test_resnet", pretrained, **dict(model_args, **kwargs))
+    return _create_resnet("test_resnet3d", pretrained, **dict(model_args, **kwargs))
 
 
 register_model_deprecations(

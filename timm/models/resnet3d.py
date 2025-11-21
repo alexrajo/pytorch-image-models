@@ -65,9 +65,10 @@ class BasicBlock3D(nn.Module):
         dilation: int = 1,
         first_dilation: Optional[int] = None,
         act_layer: Type[nn.Module] = nn.ReLU,
-        norm_layer: Type[nn.Module] = nn.BatchNorm3d,
+        norm_layer: Type[nn.Module] = nn.GroupNorm,
         device=None,
         dtype=None,
+        kernel_size=3,
     ) -> None:
         """
         Args:
@@ -82,6 +83,7 @@ class BasicBlock3D(nn.Module):
             first_dilation: Dilation rate for first convolution layer.
             act_layer: Activation layer class.
             norm_layer: Normalization layer class.
+            kernel_size: The kernel size of the convolution layers.
         """
         dd = {"device": device, "dtype": dtype}
         super().__init__()
@@ -95,26 +97,26 @@ class BasicBlock3D(nn.Module):
         self.conv1 = nn.Conv3d(
             inplanes,
             first_planes,
-            kernel_size=3,
+            kernel_size=kernel_size,
             stride=stride,
             padding=first_dilation,
             dilation=first_dilation,
             bias=False,
             **dd,
         )
-        self.bn1 = norm_layer(first_planes, **dd)
+        self.bn1 = norm_layer(num_groups=8, num_channels=first_planes, **dd)
         self.act1 = act_layer(inplace=True)
 
         self.conv2 = nn.Conv3d(
             first_planes,
             outplanes,
-            kernel_size=3,
+            kernel_size=kernel_size,
             padding=dilation,
             dilation=dilation,
             bias=False,
             **dd,
         )
-        self.bn2 = norm_layer(outplanes, **dd)
+        self.bn2 = norm_layer(num_groups=8, num_channels=outplanes, **dd)
 
         self.act2 = act_layer(inplace=True)
         self.downsample = downsample
@@ -164,7 +166,7 @@ class Bottleneck3D(nn.Module):
         dilation: int = 1,
         first_dilation: Optional[int] = None,
         act_layer: Type[nn.Module] = nn.ReLU,
-        norm_layer: Type[nn.Module] = nn.BatchNorm3d,
+        norm_layer: Type[nn.Module] = nn.GroupNorm,
         device=None,
         dtype=None,
     ) -> None:
@@ -255,7 +257,7 @@ def downsample_conv(
     dtype=None,
 ) -> nn.Module:
     dd = {"device": device, "dtype": dtype}
-    norm_layer = norm_layer or nn.BatchNorm3d
+    norm_layer = norm_layer or nn.GroupNorm
     kernel_size = 1 if stride == 1 and dilation == 1 else kernel_size
     first_dilation = (first_dilation or dilation) if kernel_size > 1 else 1
     p = get_padding(kernel_size, stride, first_dilation)
@@ -287,7 +289,7 @@ def downsample_avg(
     dtype=None,
 ) -> nn.Module:
     dd = {"device": device, "dtype": dtype}
-    norm_layer = norm_layer or nn.BatchNorm3d
+    norm_layer = norm_layer or nn.GroupNorm
     avg_stride = stride if dilation == 1 else 1
     if stride == 1 and dilation == 1:
         pool = nn.Identity()
@@ -378,6 +380,7 @@ def make_blocks(
         for block_idx in range(num_blocks):
             downsample = downsample if block_idx == 0 else None
             stride = stride if block_idx == 0 else 1
+            kernel_size = (1, 3, 3) if block_idx == 0 or block_idx == 1 else 3
             blocks.append(
                 block_fn(
                     inplanes,
@@ -385,6 +388,7 @@ def make_blocks(
                     stride,
                     downsample,
                     first_dilation=prev_dilation,
+                    kernel_size=kernel_size,
                     **block_kwargs,
                     **dd,
                 )
@@ -451,7 +455,7 @@ class ResNet3D(nn.Module):
         avg_down: bool = False,
         channels: Optional[Tuple[int, ...]] = (64, 128, 256, 512),
         act_layer: LayerType = nn.ReLU,
-        norm_layer: LayerType = nn.BatchNorm3d,
+        norm_layer: LayerType = nn.GroupNorm,
         drop_rate: float = 0.0,
         zero_init_last: bool = True,
         block_args: Optional[Dict[str, Any]] = None,
@@ -528,7 +532,13 @@ class ResNet3D(nn.Module):
             )
         else:
             self.conv1 = nn.Conv3d(
-                in_chans, inplanes, kernel_size=7, stride=2, padding=3, bias=False, **dd
+                in_chans,
+                inplanes,
+                kernel_size=(3, 7, 7),
+                stride=(1, 2, 2),
+                padding=3,
+                bias=False,
+                **dd,
             )
         self.bn1 = norm_layer(inplanes, **dd)
         self.act1 = act_layer(inplace=True)
@@ -759,7 +769,7 @@ class ResNet3D(nn.Module):
         """
         x = self.global_pool(x)
         if self.drop_rate:
-            x = F.dropout(x, p=float(self.drop_rate), training=self.training)
+            x = F.dropout3d(x, p=float(self.drop_rate), training=self.training)
         return x if pre_logits else self.fc(x)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -807,7 +817,9 @@ default_cfgs = generate_default_cfgs({})
 @register_model
 def resnet3d_18(pretrained: bool = False, **kwargs) -> ResNet3D:
     """Constructs a ResNet3D-18 model."""
-    model_args = dict(block=BasicBlock3D, layers=(2, 2, 2, 2))
+    model_args = dict(
+        block=BasicBlock3D, layers=(2, 2, 2, 2), channels=(16, 64, 128, 128)
+    )
     return _create_resnet("resnet3d_18", pretrained, **dict(model_args, **kwargs))
 
 

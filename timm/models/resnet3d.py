@@ -99,7 +99,7 @@ class BasicBlock3D(nn.Module):
         self.conv1 = nn.Conv3d(
             inplanes,
             first_planes,
-            kernel_size=kernel_size,
+            kernel_size=3,
             stride=stride,
             padding=first_dilation,
             dilation=first_dilation,
@@ -114,7 +114,7 @@ class BasicBlock3D(nn.Module):
         self.conv2 = nn.Conv3d(
             first_planes,
             outplanes,
-            kernel_size=kernel_size,
+            kernel_size=3,
             padding=dilation,
             dilation=dilation,
             bias=False,

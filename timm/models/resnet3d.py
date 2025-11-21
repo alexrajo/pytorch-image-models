@@ -33,6 +33,8 @@ from ._registry import (
     register_model_deprecations,
 )
 
+GROUP_NORM_NUM_GROUPS = 8
+
 __all__ = [
     "ResNet3D",
     "BasicBlock3D",
@@ -104,7 +106,9 @@ class BasicBlock3D(nn.Module):
             bias=False,
             **dd,
         )
-        self.bn1 = norm_layer(num_groups=8, num_channels=first_planes, **dd)
+        self.bn1 = norm_layer(
+            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=first_planes, **dd
+        )
         self.act1 = act_layer(inplace=True)
 
         self.conv2 = nn.Conv3d(
@@ -193,7 +197,9 @@ class Bottleneck3D(nn.Module):
         first_dilation = first_dilation or dilation
 
         self.conv1 = nn.Conv3d(inplanes, first_planes, kernel_size=1, bias=False, **dd)
-        self.bn1 = norm_layer(first_planes, **dd)
+        self.bn1 = norm_layer(
+            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=first_planes, **dd
+        )
         self.act1 = act_layer(inplace=True)
 
         self.conv2 = nn.Conv3d(
@@ -207,11 +213,15 @@ class Bottleneck3D(nn.Module):
             bias=False,
             **dd,
         )
-        self.bn2 = norm_layer(width, **dd)
+        self.bn2 = norm_layer(
+            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=width, **dd
+        )
         self.act2 = act_layer(inplace=True)
 
         self.conv3 = nn.Conv3d(width, outplanes, kernel_size=1, bias=False, **dd)
-        self.bn3 = norm_layer(outplanes, **dd)
+        self.bn3 = norm_layer(
+            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=outplanes, **dd
+        )
 
         self.act3 = act_layer(inplace=True)
         self.downsample = downsample
@@ -540,7 +550,9 @@ class ResNet3D(nn.Module):
                 bias=False,
                 **dd,
             )
-        self.bn1 = norm_layer(inplanes, **dd)
+        self.bn1 = norm_layer(
+            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=inplanes, **dd
+        )
         self.act1 = act_layer(inplace=True)
         self.feature_info = [dict(num_chs=inplanes, reduction=2, module="act1")]
 

@@ -120,7 +120,9 @@ class BasicBlock3D(nn.Module):
             bias=False,
             **dd,
         )
-        self.bn2 = norm_layer(num_groups=8, num_channels=outplanes, **dd)
+        self.bn2 = norm_layer(
+            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=outplanes, **dd
+        )
 
         self.act2 = act_layer(inplace=True)
         self.downsample = downsample
@@ -284,7 +286,9 @@ def downsample_conv(
                 bias=False,
                 **dd,
             ),
-            norm_layer(out_channels, **dd),
+            norm_layer(
+                num_groups=GROUP_NORM_NUM_GROUPS, num_channels=out_channels, **dd
+            ),
         ]
     )
 
@@ -315,7 +319,9 @@ def downsample_avg(
             nn.Conv3d(
                 in_channels, out_channels, 1, stride=1, padding=0, bias=False, **dd
             ),
-            norm_layer(out_channels, **dd),
+            norm_layer(
+                num_groups=GROUP_NORM_NUM_GROUPS, num_channels=out_channels, **dd
+            ),
         ]
     )
 
@@ -522,7 +528,9 @@ class ResNet3D(nn.Module):
                     nn.Conv3d(
                         in_chans, stem_chs[0], 3, stride=2, padding=1, bias=False, **dd
                     ),
-                    norm_layer(stem_chs[0], **dd),
+                    norm_layer(
+                        num_groups=GROUP_NORM_NUM_GROUPS, num_channels=stem_chs[0], **dd
+                    ),
                     act_layer(inplace=True),
                     nn.Conv3d(
                         stem_chs[0],
@@ -533,7 +541,9 @@ class ResNet3D(nn.Module):
                         bias=False,
                         **dd,
                     ),
-                    norm_layer(stem_chs[1], **dd),
+                    norm_layer(
+                        num_groups=GROUP_NORM_NUM_GROUPS, num_channels=stem_chs[1], **dd
+                    ),
                     act_layer(inplace=True),
                     nn.Conv3d(
                         stem_chs[1], inplanes, 3, stride=1, padding=1, bias=False, **dd
@@ -571,7 +581,11 @@ class ResNet3D(nn.Module):
                             bias=False,
                             **dd,
                         ),
-                        norm_layer(inplanes, **dd),
+                        norm_layer(
+                            num_groups=GROUP_NORM_NUM_GROUPS,
+                            num_channels=inplanes,
+                            **dd,
+                        ),
                         act_layer(inplace=True),
                     ],
                 )

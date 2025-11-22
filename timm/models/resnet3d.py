@@ -793,9 +793,9 @@ class ResNet3D(nn.Module):
         Returns:
             Output tensor.
         """
-        x = self.global_pool(x)
         if self.drop_rate:
             x = F.dropout3d(x, p=float(self.drop_rate), training=self.training)
+        x = self.global_pool(x)
         return x if pre_logits else self.fc(x)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

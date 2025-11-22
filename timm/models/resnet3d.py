@@ -794,10 +794,10 @@ class ResNet3D(nn.Module):
             Output tensor.
         """
         x = self.global_pool(x)
-        print(f"shape of head {x}")
+        print(f"shape of head {x.shape}")
         if self.drop_rate:
             x = F.dropout3d(x, p=float(self.drop_rate), training=self.training)
-        print(f"shape of head right before {x}")
+        print(f"shape of head right before {x.shape}")
         return x if pre_logits else self.fc(x)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

@@ -99,7 +99,7 @@ class BasicBlock3D(nn.Module):
         self.conv1 = nn.Conv3d(
             inplanes,
             first_planes,
-            kernel_size=3,
+            kernel_size=kernel_size,
             stride=stride,
             padding=first_dilation,
             dilation=first_dilation,
@@ -114,7 +114,7 @@ class BasicBlock3D(nn.Module):
         self.conv2 = nn.Conv3d(
             first_planes,
             outplanes,
-            kernel_size=3,
+            kernel_size=kernel_size,
             padding=dilation,
             dilation=dilation,
             bias=False,
@@ -391,12 +391,17 @@ def make_blocks(
                 else downsample_conv(**down_kwargs)
             )
 
-        block_kwargs = dict(reduce_first=reduce_first, dilation=dilation, **kwargs)
         blocks = []
         for block_idx in range(num_blocks):
             downsample = downsample if block_idx == 0 else None
             stride = stride if block_idx == 0 else 1
             kernel_size = (1, 3, 3) if block_idx == 0 or block_idx == 1 else 3
+            block_kwargs = dict(
+                reduce_first=reduce_first,
+                dilation=dilation,
+                kernel_size=kernel_size,
+                **kwargs,
+            )
             blocks.append(
                 block_fn(
                     inplanes,
@@ -404,7 +409,6 @@ def make_blocks(
                     stride,
                     downsample,
                     first_dilation=prev_dilation,
-                    kernel_size=kernel_size,
                     **block_kwargs,
                     **dd,
                 )

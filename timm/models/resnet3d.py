@@ -68,6 +68,7 @@ class BasicBlock3D(nn.Module):
         first_dilation: Optional[int] = None,
         act_layer: Type[nn.Module] = nn.ReLU,
         norm_layer: Type[nn.Module] = nn.GroupNorm,
+        padding: int = 1,
         device=None,
         dtype=None,
         kernel_size=3,
@@ -86,6 +87,7 @@ class BasicBlock3D(nn.Module):
             act_layer: Activation layer class.
             norm_layer: Normalization layer class.
             kernel_size: The kernel size of the convolution layers.
+            padding: The padding for the convolutional layers
         """
         dd = {"device": device, "dtype": dtype}
         super().__init__()
@@ -101,7 +103,7 @@ class BasicBlock3D(nn.Module):
             first_planes,
             kernel_size=kernel_size,
             stride=stride,
-            padding=first_dilation,
+            padding=padding,
             dilation=first_dilation,
             bias=False,
             **dd,
@@ -115,7 +117,7 @@ class BasicBlock3D(nn.Module):
             first_planes,
             outplanes,
             kernel_size=kernel_size,
-            padding=dilation,
+            padding=padding,
             dilation=dilation,
             bias=False,
             **dd,
@@ -396,10 +398,11 @@ def make_blocks(
             downsample = downsample if block_idx == 0 else None
             stride = stride if block_idx == 0 else 1
             kernel_size = (1, 3, 3) if block_idx == 0 or block_idx == 1 else 3
-            dilation = (0, 1, 1) if block_idx == 0 or block_idx == 1 else 1
+            padding = (0, 1, 1) if block_idx == 0 or block_idx == 1 else 1
             block_kwargs = dict(
                 reduce_first=reduce_first,
                 dilation=dilation,
+                padding=padding,
                 kernel_size=kernel_size,
                 **kwargs,
             )

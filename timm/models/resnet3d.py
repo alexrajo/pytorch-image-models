@@ -793,6 +793,7 @@ class ResNet3D(nn.Module):
         Returns:
             Output tensor.
         """
+        print(f"shape before pool {x.shape}")
         x = self.global_pool(x)
         print(f"shape of head {x.shape}")
         if self.drop_rate:

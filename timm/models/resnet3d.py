@@ -396,6 +396,7 @@ def make_blocks(
             downsample = downsample if block_idx == 0 else None
             stride = stride if block_idx == 0 else 1
             kernel_size = (1, 3, 3) if block_idx == 0 or block_idx == 1 else 3
+            dilation = (0, 1, 1) if block_idx == 0 or block_idx == 1 else 1
             block_kwargs = dict(
                 reduce_first=reduce_first,
                 dilation=dilation,

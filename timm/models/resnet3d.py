@@ -851,7 +851,9 @@ default_cfgs = generate_default_cfgs({})
 @register_model
 def resnet3d_18(pretrained: bool = False, **kwargs) -> ResNet3D:
     """Constructs a ResNet3D-18 model."""
-    model_args = dict(block=BasicBlock3D, layers=(2, 2, 2, 2), channels=(8, 16, 32, 64))
+    model_args = dict(
+        block=BasicBlock3D, layers=(2, 2, 2, 2), channels=(16, 64, 128, 128)
+    )
     return _create_resnet("resnet3d_18", pretrained, **dict(model_args, **kwargs))
 
 

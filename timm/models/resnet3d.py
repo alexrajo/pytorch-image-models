@@ -112,11 +112,11 @@ class BasicBlock3D(nn.Module):
             (
                 norm_layer(
                     num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=stem_chs[0],
+                    num_channels=first_planes,
                     **dd,
                 )
                 if norm_layer is nn.GroupNorm
-                else norm_layer(num_channels=stem_chs[0], **dd)
+                else norm_layer(num_channels=first_planes, **dd)
             ),
         )
         self.act1 = act_layer(inplace=True)
@@ -134,11 +134,11 @@ class BasicBlock3D(nn.Module):
             (
                 norm_layer(
                     num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=stem_chs[0],
+                    num_channels=outplanes,
                     **dd,
                 )
                 if norm_layer is nn.GroupNorm
-                else norm_layer(num_channels=stem_chs[0], **dd)
+                else norm_layer(num_channels=outplanes, **dd)
             ),
         )
 
@@ -221,11 +221,11 @@ class Bottleneck3D(nn.Module):
             (
                 norm_layer(
                     num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=stem_chs[0],
+                    num_channels=first_planes,
                     **dd,
                 )
                 if norm_layer is nn.GroupNorm
-                else norm_layer(num_channels=stem_chs[0], **dd)
+                else norm_layer(num_channels=first_planes, **dd)
             ),
         )
         self.act1 = act_layer(inplace=True)
@@ -245,11 +245,11 @@ class Bottleneck3D(nn.Module):
             (
                 norm_layer(
                     num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=stem_chs[0],
+                    num_channels=width,
                     **dd,
                 )
                 if norm_layer is nn.GroupNorm
-                else norm_layer(num_channels=stem_chs[0], **dd)
+                else norm_layer(num_channels=width, **dd)
             ),
         )
         self.act2 = act_layer(inplace=True)
@@ -259,11 +259,11 @@ class Bottleneck3D(nn.Module):
             (
                 norm_layer(
                     num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=stem_chs[0],
+                    num_channels=outplanes,
                     **dd,
                 )
                 if norm_layer is nn.GroupNorm
-                else norm_layer(num_channels=stem_chs[0], **dd)
+                else norm_layer(num_channels=outplanes, **dd)
             ),
         )
 
@@ -331,11 +331,11 @@ def downsample_conv(
             (
                 norm_layer(
                     num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=stem_chs[0],
+                    num_channels=out_channels,
                     **dd,
                 )
                 if norm_layer is nn.GroupNorm
-                else norm_layer(num_channels=stem_chs[0], **dd)
+                else norm_layer(num_channels=out_channels, **dd)
             ),
         ]
     )
@@ -370,11 +370,11 @@ def downsample_avg(
             (
                 norm_layer(
                     num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=stem_chs[0],
+                    num_channels=out_channels,
                     **dd,
                 )
                 if norm_layer is nn.GroupNorm
-                else norm_layer(num_channels=stem_chs[0], **dd)
+                else norm_layer(num_channels=out_channels, **dd)
             ),
         ]
     )
@@ -653,11 +653,11 @@ class ResNet3D(nn.Module):
             (
                 norm_layer(
                     num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=stem_chs[0],
+                    num_channels=inplanes,
                     **dd,
                 )
                 if norm_layer is nn.GroupNorm
-                else norm_layer(num_channels=stem_chs[0], **dd)
+                else norm_layer(num_channels=inplanes, **dd)
             ),
         )
         self.act1 = act_layer(inplace=True)
@@ -681,11 +681,11 @@ class ResNet3D(nn.Module):
                         (
                             norm_layer(
                                 num_groups=GROUP_NORM_NUM_GROUPS,
-                                num_channels=stem_chs[0],
+                                num_channels=inplanes,
                                 **dd,
                             )
                             if norm_layer is nn.GroupNorm
-                            else norm_layer(num_channels=stem_chs[0], **dd)
+                            else norm_layer(num_channels=inplanes, **dd)
                         ),
                         act_layer(inplace=True),
                     ],

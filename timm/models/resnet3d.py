@@ -108,8 +108,16 @@ class BasicBlock3D(nn.Module):
             bias=False,
             **dd,
         )
-        self.bn1 = norm_layer(
-            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=first_planes, **dd
+        self.bn1 = (
+            (
+                norm_layer(
+                    num_groups=GROUP_NORM_NUM_GROUPS,
+                    num_channels=stem_chs[0],
+                    **dd,
+                )
+                if norm_layer is nn.GroupNorm
+                else norm_layer(num_channels=stem_chs[0], **dd)
+            ),
         )
         self.act1 = act_layer(inplace=True)
 
@@ -122,8 +130,16 @@ class BasicBlock3D(nn.Module):
             bias=False,
             **dd,
         )
-        self.bn2 = norm_layer(
-            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=outplanes, **dd
+        self.bn2 = (
+            (
+                norm_layer(
+                    num_groups=GROUP_NORM_NUM_GROUPS,
+                    num_channels=stem_chs[0],
+                    **dd,
+                )
+                if norm_layer is nn.GroupNorm
+                else norm_layer(num_channels=stem_chs[0], **dd)
+            ),
         )
 
         self.act2 = act_layer(inplace=True)
@@ -201,8 +217,16 @@ class Bottleneck3D(nn.Module):
         first_dilation = first_dilation or dilation
 
         self.conv1 = nn.Conv3d(inplanes, first_planes, kernel_size=1, bias=False, **dd)
-        self.bn1 = norm_layer(
-            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=first_planes, **dd
+        self.bn1 = (
+            (
+                norm_layer(
+                    num_groups=GROUP_NORM_NUM_GROUPS,
+                    num_channels=stem_chs[0],
+                    **dd,
+                )
+                if norm_layer is nn.GroupNorm
+                else norm_layer(num_channels=stem_chs[0], **dd)
+            ),
         )
         self.act1 = act_layer(inplace=True)
 
@@ -217,14 +241,30 @@ class Bottleneck3D(nn.Module):
             bias=False,
             **dd,
         )
-        self.bn2 = norm_layer(
-            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=width, **dd
+        self.bn2 = (
+            (
+                norm_layer(
+                    num_groups=GROUP_NORM_NUM_GROUPS,
+                    num_channels=stem_chs[0],
+                    **dd,
+                )
+                if norm_layer is nn.GroupNorm
+                else norm_layer(num_channels=stem_chs[0], **dd)
+            ),
         )
         self.act2 = act_layer(inplace=True)
 
         self.conv3 = nn.Conv3d(width, outplanes, kernel_size=1, bias=False, **dd)
-        self.bn3 = norm_layer(
-            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=outplanes, **dd
+        self.bn3 = (
+            (
+                norm_layer(
+                    num_groups=GROUP_NORM_NUM_GROUPS,
+                    num_channels=stem_chs[0],
+                    **dd,
+                )
+                if norm_layer is nn.GroupNorm
+                else norm_layer(num_channels=stem_chs[0], **dd)
+            ),
         )
 
         self.act3 = act_layer(inplace=True)
@@ -288,8 +328,14 @@ def downsample_conv(
                 bias=False,
                 **dd,
             ),
-            norm_layer(
-                num_groups=GROUP_NORM_NUM_GROUPS, num_channels=out_channels, **dd
+            (
+                norm_layer(
+                    num_groups=GROUP_NORM_NUM_GROUPS,
+                    num_channels=stem_chs[0],
+                    **dd,
+                )
+                if norm_layer is nn.GroupNorm
+                else norm_layer(num_channels=stem_chs[0], **dd)
             ),
         ]
     )
@@ -321,8 +367,14 @@ def downsample_avg(
             nn.Conv3d(
                 in_channels, out_channels, 1, stride=1, padding=0, bias=False, **dd
             ),
-            norm_layer(
-                num_groups=GROUP_NORM_NUM_GROUPS, num_channels=out_channels, **dd
+            (
+                norm_layer(
+                    num_groups=GROUP_NORM_NUM_GROUPS,
+                    num_channels=stem_chs[0],
+                    **dd,
+                )
+                if norm_layer is nn.GroupNorm
+                else norm_layer(num_channels=stem_chs[0], **dd)
             ),
         ]
     )
@@ -474,14 +526,18 @@ class ResNet3D(nn.Module):
         base_width: int = 64,
         stem_width: int = 64,
         stem_type: str = "",
+        reduce_params_in_layers: list = [],
         replace_stem_pool: bool = False,
         block_reduce_first: int = 1,
+        verbose: bool = False,
         down_kernel_size: int = 1,
         avg_down: bool = False,
         channels: Optional[Tuple[int, ...]] = (64, 128, 256, 512),
         act_layer: LayerType = nn.ReLU,
         norm_layer: LayerType = nn.GroupNorm,
         drop_rate: float = 0.0,
+        kernel_size=7,  # Can be set to (3, 7, 7),
+        stride=2,  # Can be set to (1, 2, 2)
         zero_init_last: bool = True,
         block_args: Optional[Dict[str, Any]] = None,
         device=None,
@@ -515,6 +571,18 @@ class ResNet3D(nn.Module):
             block_args (dict): Extra kwargs to pass through to block module
         """
         super().__init__()
+        if verbose:
+            print(
+                "Got these params:",
+                kernel_size,
+                stride,
+                channels,
+                norm_layer,
+                drop_rate,
+                num_classes,
+                in_chans,
+                reduce_params_in_layers,
+            )
         dd = {"device": device, "dtype": dtype}
         block_args = block_args or dict()
         assert output_stride in (8, 16, 32)
@@ -537,8 +605,14 @@ class ResNet3D(nn.Module):
                     nn.Conv3d(
                         in_chans, stem_chs[0], 3, stride=2, padding=1, bias=False, **dd
                     ),
-                    norm_layer(
-                        num_groups=GROUP_NORM_NUM_GROUPS, num_channels=stem_chs[0], **dd
+                    (
+                        norm_layer(
+                            num_groups=GROUP_NORM_NUM_GROUPS,
+                            num_channels=stem_chs[0],
+                            **dd,
+                        )
+                        if norm_layer is nn.GroupNorm
+                        else norm_layer(num_channels=stem_chs[0], **dd)
                     ),
                     act_layer(inplace=True),
                     nn.Conv3d(
@@ -550,8 +624,14 @@ class ResNet3D(nn.Module):
                         bias=False,
                         **dd,
                     ),
-                    norm_layer(
-                        num_groups=GROUP_NORM_NUM_GROUPS, num_channels=stem_chs[1], **dd
+                    (
+                        norm_layer(
+                            num_groups=GROUP_NORM_NUM_GROUPS,
+                            num_channels=stem_chs[0],
+                            **dd,
+                        )
+                        if norm_layer is nn.GroupNorm
+                        else norm_layer(num_channels=stem_chs[0], **dd)
                     ),
                     act_layer(inplace=True),
                     nn.Conv3d(
@@ -563,14 +643,22 @@ class ResNet3D(nn.Module):
             self.conv1 = nn.Conv3d(
                 in_chans,
                 inplanes,
-                kernel_size=(3, 7, 7),
-                stride=(1, 2, 2),
+                kernel_size=kernel_size,
+                stride=stride,
                 padding=3,
                 bias=False,
                 **dd,
             )
-        self.bn1 = norm_layer(
-            num_groups=GROUP_NORM_NUM_GROUPS, num_channels=inplanes, **dd
+        self.bn1 = (
+            (
+                norm_layer(
+                    num_groups=GROUP_NORM_NUM_GROUPS,
+                    num_channels=stem_chs[0],
+                    **dd,
+                )
+                if norm_layer is nn.GroupNorm
+                else norm_layer(num_channels=stem_chs[0], **dd)
+            ),
         )
         self.act1 = act_layer(inplace=True)
         self.feature_info = [dict(num_chs=inplanes, reduction=2, module="act1")]
@@ -590,10 +678,14 @@ class ResNet3D(nn.Module):
                             bias=False,
                             **dd,
                         ),
-                        norm_layer(
-                            num_groups=GROUP_NORM_NUM_GROUPS,
-                            num_channels=inplanes,
-                            **dd,
+                        (
+                            norm_layer(
+                                num_groups=GROUP_NORM_NUM_GROUPS,
+                                num_channels=stem_chs[0],
+                                **dd,
+                            )
+                            if norm_layer is nn.GroupNorm
+                            else norm_layer(num_channels=stem_chs[0], **dd)
                         ),
                         act_layer(inplace=True),
                     ],
@@ -613,6 +705,7 @@ class ResNet3D(nn.Module):
             base_width=base_width,
             output_stride=output_stride,
             reduce_first=block_reduce_first,
+            reduce_params_in_layers=reduce_params_in_layers,
             avg_down=avg_down,
             down_kernel_size=down_kernel_size,
             act_layer=act_layer,
@@ -852,9 +945,7 @@ default_cfgs = generate_default_cfgs({})
 @register_model
 def resnet3d_18(pretrained: bool = False, **kwargs) -> ResNet3D:
     """Constructs a ResNet3D-18 model."""
-    model_args = dict(
-        block=BasicBlock3D, layers=(2, 2, 2, 2), channels=(64, 128, 256, 512)
-    )
+    model_args = dict(block=BasicBlock3D, layers=(2, 2, 2, 2))
     return _create_resnet("resnet3d_18", pretrained, **dict(model_args, **kwargs))
 
 

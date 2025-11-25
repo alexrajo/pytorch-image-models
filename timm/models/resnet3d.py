@@ -109,15 +109,11 @@ class BasicBlock3D(nn.Module):
             **dd,
         )
         self.bn1 = (
-            (
-                norm_layer(
-                    num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=first_planes,
-                    **dd,
-                )
-                if norm_layer is nn.GroupNorm
-                else norm_layer(first_planes, **dd)
-            ),
+            norm_layer(
+                num_groups=GROUP_NORM_NUM_GROUPS, num_channels=first_planes, **dd
+            )
+            if norm_layer is nn.GroupNorm
+            else norm_layer(first_planes, **dd)
         )
         self.act1 = act_layer(inplace=True)
 
@@ -131,15 +127,13 @@ class BasicBlock3D(nn.Module):
             **dd,
         )
         self.bn2 = (
-            (
-                norm_layer(
-                    num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=outplanes,
-                    **dd,
-                )
-                if norm_layer is nn.GroupNorm
-                else norm_layer(outplanes, **dd)
-            ),
+            norm_layer(
+                num_groups=GROUP_NORM_NUM_GROUPS,
+                num_channels=outplanes,
+                **dd,
+            )
+            if norm_layer is nn.GroupNorm
+            else norm_layer(outplanes, **dd)
         )
 
         self.act2 = act_layer(inplace=True)
@@ -218,15 +212,13 @@ class Bottleneck3D(nn.Module):
 
         self.conv1 = nn.Conv3d(inplanes, first_planes, kernel_size=1, bias=False, **dd)
         self.bn1 = (
-            (
-                norm_layer(
-                    num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=first_planes,
-                    **dd,
-                )
-                if norm_layer is nn.GroupNorm
-                else norm_layer(first_planes, **dd)
-            ),
+            norm_layer(
+                num_groups=GROUP_NORM_NUM_GROUPS,
+                num_channels=first_planes,
+                **dd,
+            )
+            if norm_layer is nn.GroupNorm
+            else norm_layer(first_planes, **dd)
         )
         self.act1 = act_layer(inplace=True)
 
@@ -242,31 +234,26 @@ class Bottleneck3D(nn.Module):
             **dd,
         )
         self.bn2 = (
-            (
-                norm_layer(
-                    num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=width,
-                    **dd,
-                )
-                if norm_layer is nn.GroupNorm
-                else norm_layer(width, **dd)
-            ),
+            norm_layer(
+                num_groups=GROUP_NORM_NUM_GROUPS,
+                num_channels=width,
+                **dd,
+            )
+            if norm_layer is nn.GroupNorm
+            else norm_layer(width, **dd)
         )
         self.act2 = act_layer(inplace=True)
 
         self.conv3 = nn.Conv3d(width, outplanes, kernel_size=1, bias=False, **dd)
         self.bn3 = (
-            (
-                norm_layer(
-                    num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=outplanes,
-                    **dd,
-                )
-                if norm_layer is nn.GroupNorm
-                else norm_layer(outplanes, **dd)
-            ),
+            norm_layer(
+                num_groups=GROUP_NORM_NUM_GROUPS,
+                num_channels=outplanes,
+                **dd,
+            )
+            if norm_layer is nn.GroupNorm
+            else norm_layer(outplanes, **dd)
         )
-
         self.act3 = act_layer(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -650,15 +637,9 @@ class ResNet3D(nn.Module):
                 **dd,
             )
         self.bn1 = (
-            (
-                norm_layer(
-                    num_groups=GROUP_NORM_NUM_GROUPS,
-                    num_channels=inplanes,
-                    **dd,
-                )
-                if norm_layer is nn.GroupNorm
-                else norm_layer(inplanes, **dd)
-            ),
+            norm_layer(num_groups=GROUP_NORM_NUM_GROUPS, num_channels=inplanes, **dd)
+            if norm_layer is nn.GroupNorm
+            else norm_layer(inplanes, **dd)
         )
         self.act1 = act_layer(inplace=True)
         self.feature_info = [dict(num_chs=inplanes, reduction=2, module="act1")]

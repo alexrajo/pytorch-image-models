@@ -398,6 +398,7 @@ def make_blocks(
             downsample = downsample if block_idx == 0 else None
             stride = stride if block_idx == 0 else 1
             kernel_size = (1, 3, 3) if block_idx == 0 or block_idx == 1 else 3
+            kernel_size = 3
             padding = (0, 1, 1) if block_idx == 0 or block_idx == 1 else 1
             block_kwargs = dict(
                 reduce_first=reduce_first,
@@ -852,7 +853,7 @@ default_cfgs = generate_default_cfgs({})
 def resnet3d_18(pretrained: bool = False, **kwargs) -> ResNet3D:
     """Constructs a ResNet3D-18 model."""
     model_args = dict(
-        block=BasicBlock3D, layers=(2, 2, 2, 2), channels=(16, 64, 128, 128)
+        block=BasicBlock3D, layers=(2, 2, 2, 2), channels=(16, 32, 64, 128)
     )
     return _create_resnet("resnet3d_18", pretrained, **dict(model_args, **kwargs))
 

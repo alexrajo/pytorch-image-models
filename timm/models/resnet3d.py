@@ -714,9 +714,9 @@ class ResNet3D(nn.Module):
             nn.Linear(256, 128),
         )
         self.predictor = nn.Sequential(
-            nn.Linear(self.num_features, 256),
+            nn.Linear(128, 256),
             nn.ReLU(),
-            nn.Linear(256, 128),
+            nn.Linear(256, 64),
         )
 
         self.init_weights(zero_init_last=zero_init_last)

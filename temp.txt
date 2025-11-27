@@ -1,0 +1,4 @@
+/cluster/projects/vc/courses/TDT17/mic/ODELIA2025/data/MHA/data_unilateral/015D3BF9_left/Pre.nii.gz
+/cluster/projects/vc/courses/TDT17/mic/ODELIA2025/data/RSH/data_unilateral/Anonymized114_right/Pre.nii.gz
+/cluster/projects/vc/courses/TDT17/mic/ODELIA2025/data/RUMC/data_unilateral/RUMC_010_left/Pre.nii.gz
+/cluster/projects/vc/courses/TDT17/mic/ODELIA2025/data/UKA/data_unilateral/UKA_10_left/Pre.nii.gz

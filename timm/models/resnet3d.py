@@ -513,6 +513,7 @@ class ResNet3D(nn.Module):
         base_width: int = 64,
         stem_width: int = 64,
         stem_type: str = "",
+        unsupervised=False,
         reduce_params_in_layers: list = [],
         replace_stem_pool: bool = False,
         block_reduce_first: int = 1,
@@ -576,6 +577,7 @@ class ResNet3D(nn.Module):
         self.num_classes = num_classes
         self.drop_rate = drop_rate
         self.grad_checkpointing = False
+        self.unsupervised = unsupervised
 
         act_layer = get_act_layer(act_layer)
         norm_layer = get_norm_layer(norm_layer)
@@ -704,6 +706,9 @@ class ResNet3D(nn.Module):
         )
         self.global_pool, self.fc = create_classifier(
             self.num_features, self.num_classes, pool_type=global_pool, **dd
+        )
+        self.unsupervised_head = nn.Sequential(
+            [nn.Linear(self.num_features, 512), nn.ReLU(), nn.Linear(512, 128)]
         )
 
         self.init_weights(zero_init_last=zero_init_last)
@@ -879,6 +884,8 @@ class ResNet3D(nn.Module):
         if self.drop_rate:
             x = F.dropout3d(x, p=float(self.drop_rate), training=self.training)
         x = self.global_pool(x)
+        if self.unsupervised:
+            return self.unsupervised_head(x)
         return x if pre_logits else self.fc(x)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

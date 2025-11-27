@@ -708,7 +708,7 @@ class ResNet3D(nn.Module):
             self.num_features, self.num_classes, pool_type=global_pool, **dd
         )
         self.unsupervised_head = nn.Sequential(
-            [nn.Linear(self.num_features, 512), nn.ReLU(), nn.Linear(512, 128)]
+            nn.Linear(self.num_features, 512), nn.ReLU(), nn.Linear(512, 128)
         )
 
         self.init_weights(zero_init_last=zero_init_last)

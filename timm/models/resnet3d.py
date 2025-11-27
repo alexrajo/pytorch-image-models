@@ -707,8 +707,16 @@ class ResNet3D(nn.Module):
         self.global_pool, self.fc = create_classifier(
             self.num_features, self.num_classes, pool_type=global_pool, **dd
         )
-        self.unsupervised_head = nn.Sequential(
-            nn.Linear(self.num_features, 512), nn.ReLU(), nn.Linear(512, 128)
+
+        self.projector = nn.Sequential(
+            nn.Linear(self.num_features, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+        )
+        self.predictor = nn.Sequential(
+            nn.Linear(self.num_features, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
         )
 
         self.init_weights(zero_init_last=zero_init_last)
@@ -885,7 +893,9 @@ class ResNet3D(nn.Module):
             x = F.dropout3d(x, p=float(self.drop_rate), training=self.training)
         x = self.global_pool(x)
         if self.unsupervised:
-            return self.unsupervised_head(x)
+            z = self.projector(x)
+            p = self.predictor(z)
+            return p, z.detach()
         return x if pre_logits else self.fc(x)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
